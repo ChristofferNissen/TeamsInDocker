@@ -1,4 +1,6 @@
 # Microsoft Teams in Docker
+![](https://i.imgur.com/pVwxCtz.png)
+
 
 This projects objective is to provide Microsoft Teams as a docker image to enable multiple accounts to be used simultaniously.
 
