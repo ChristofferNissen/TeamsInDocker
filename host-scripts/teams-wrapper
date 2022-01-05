@@ -1,0 +1,127 @@
+#!/bin/bash
+
+### Application Configuration
+SCRIPT_NAME="teams-wrapper"
+LOCAL_COMPUTER_USERNAME=$(whoami)
+
+# Docker config
+IMAGE_NAME="stifstof/teams-desktop:latest"
+CONTAINER_NAME="teams"
+CONFIG_PATH="${HOME}/.config/Microsoft"
+
+
+
+
+
+########## Script
+
+PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+TEAMS_DESKTOP_USER=${LOCAL_COMPUTER_USERNAME}
+
+# do we need to use sudo to start docker containers?
+(id -Gn | grep -q docker) || SUDO=sudo
+
+USER_UID=$(id -u)
+USER_GID=$(id -g)
+
+XSOCK=/tmp/.X11-unix-teamsOne
+XAUTH=/tmp/.docker.xauth-teamsOne
+
+DOWNLOAD_DIR=$(xdg-user-dir DOWNLOAD)
+if [ -z "${DOWNLOAD_DIR}" ]; then
+  DOWNLOAD_DIR="${HOME}/Downloads"
+fi
+
+list_commands() {
+  echo ""
+  echo "Launch teams using:"
+  echo "  teams                     OR "
+  echo "  teams-wrapper teams"
+  echo ""
+  exit 1
+}
+
+cleanup_stopped_teams_desktop_instances() {
+  echo "Cleaning up stopped teams-desktop instances..."
+  for c in $(${SUDO} docker ps -a -q); do
+    image="$(${SUDO} docker inspect -f {{.Config.Image}} ${c})"
+    if [ "${image}" == ${IMAGE_NAME} ]; then
+      running=$(${SUDO} docker inspect -f {{.State.Running}} ${c})
+      if [ "${running}" != "true" ]; then
+        ${SUDO} docker rm "${c}" >/dev/null
+      fi
+    fi
+  done
+}
+
+prepare_docker_env_parameters() {
+  ENV_VARS+=" --env=USER_UID=${USER_UID}"
+  ENV_VARS+=" --env=USER_GID=${USER_GID}"
+  ENV_VARS+=" --env=DISPLAY=unix$DISPLAY"
+  ENV_VARS+=" --env=XAUTHORITY=${XAUTH}"
+  ENV_VARS+=" --env=TZ=$(date +%Z)"
+}
+
+prepare_docker_volume_parameters() {
+  touch ${XAUTH}
+  xauth nlist :0 | sed -e 's/^..../ffff/' | xauth -f ${XAUTH} nmerge -
+
+  VOLUMES+=" --volume=${CONFIG_PATH}:/home/${TEAMS_DESKTOP_USER}/.config/Microsoft/"
+  VOLUMES+=" --volume=${XSOCK}:${XSOCK}"
+  VOLUMES+=" --volume=${XAUTH}:${XAUTH}"
+  VOLUMES+=" --volume=/run/user/${USER_UID}/pulse:/run/pulse"
+
+  if [ -d "${HOME}/tmp" ]; then
+    VOLUMES+=" --volume=${HOME}/tmp:/home/${TEAMS_DESKTOP_USER}/tmp"
+  fi
+
+}
+
+prepare_docker_device_parameters() {
+  # enumerate video devices for webcam support
+  VIDEO_DEVICES=
+  for device in /dev/video*; do
+    if [ -c $device ]; then
+      VIDEO_DEVICES="${VIDEO_DEVICES} --device $device:$device"
+    fi
+  done
+}
+
+prog=$(basename $0)
+exec=$(which $prog)
+
+if [[ ${prog} == ${SCRIPT_NAME} ]]; then
+  case ${1} in
+  teams)
+    prog=${1}
+    shift
+    ;;
+  * | help)
+    list_commands
+    exit 1
+    ;;
+  esac
+elif [[ -n ${exec} ]]; then
+  # launch host binary if it exists
+  exec ${exec} $@
+fi
+
+cleanup_stopped_teams_desktop_instances
+prepare_docker_env_parameters
+prepare_docker_volume_parameters
+prepare_docker_device_parameters
+
+echo "Starting ${prog}..."
+${SUDO} docker run -d \
+  --name ${CONTAINER_NAME} \
+  --privileged \
+  --device /dev/dri \
+  --device /dev/snd \
+  --cap-add=SYS_ADMIN \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  -e DISPLAY=unix$DISPLAY \
+  ${ENV_VARS} \
+  ${VIDEO_DEVICES} \
+  ${VOLUMES} \
+  ${TEAMS_EXTRA_DOCKER_ARGUMENTS} \
+  ${IMAGE_NAME} ${prog} $@ >/dev/null
