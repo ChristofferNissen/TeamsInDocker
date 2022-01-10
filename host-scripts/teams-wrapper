@@ -116,6 +116,7 @@ ${SUDO} docker run -d \
   --name ${CONTAINER_NAME} \
   --network host \
   --privileged \
+  --memory=8g \
   --device /dev/dri \
   --device /dev/snd \
   --cap-add=SYS_ADMIN \
