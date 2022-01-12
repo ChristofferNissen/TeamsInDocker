@@ -60,6 +60,7 @@ prepare_docker_env_parameters() {
   ENV_VARS+=" --env=DISPLAY=unix$DISPLAY"
   ENV_VARS+=" --env=XAUTHORITY=${XAUTH}"
   ENV_VARS+=" --env=TZ=$(date +%Z)"
+  ENV_VARS+=" --env=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket"
 }
 
 prepare_docker_volume_parameters() {
@@ -70,6 +71,7 @@ prepare_docker_volume_parameters() {
   VOLUMES+=" --volume=${XSOCK}:${XSOCK}"
   VOLUMES+=" --volume=${XAUTH}:${XAUTH}"
   VOLUMES+=" --volume=/run/user/${USER_UID}/pulse:/run/pulse"
+  VOLUMES+=" --volume=/run/user/${USER_UID}/bus:/run/dbus/system_bus_socket"
 
   if [ -d "${HOME}/tmp" ]; then
     VOLUMES+=" --volume=${HOME}/tmp:/home/${TEAMS_DESKTOP_USER}/tmp"
