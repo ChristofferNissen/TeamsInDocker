@@ -3,19 +3,19 @@ launch:
 	teams-wrapper-two teams
 
 kill-containers:
-	docker kill teams || docker kill teams-two  # if error try kill other instance before exit
-	docker kill teams-two
+	podman kill teams || podman kill teams-two  # if error try kill other instance before exit
+	podman kill teams-two
 
 build:
-	docker build . -t stifstof/teams-desktop:latest
+	podman build . -t stifstof/teams-desktop:latest
 
 install:
-	docker run -it --rm \
+	podman run -it --rm --privileged \
 	--volume /usr/local/bin:/target \
 	stifstof/teams-desktop:latest install
 
 uninstall:
-	docker run -it --rm \
+	podman run -it --rm --privileged \
 	--volume /usr/local/bin:/target \
 	stifstof/teams-desktop:latest uninstall
 
