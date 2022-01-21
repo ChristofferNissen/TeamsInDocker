@@ -34,4 +34,4 @@ create-empty-config-folders:
 	mkdir ~/.config/MicrosoftTwo
 
 add-to-path:
-	export PATH=$PATH:~/Documents/git/TeamsInDocker/bin
+	export PATH=$PATH:/home/cn/Documents/git/TeamsInDocker/bin
