@@ -4,28 +4,27 @@
 SCRIPT_NAME="teams-wrapper"
 LOCAL_COMPUTER_USERNAME=$(whoami)
 
-# podman config
-IMAGE_NAME="stifstof/teams-desktop:latest"
+# registry config
+IMAGE_NAME="docker.io/stifstof/teams-desktop:latest"
 CONTAINER_NAME="teams"
 CONFIG_PATH="${HOME}/.config/Microsoft"
 
-
-
-
+# Container runtime (docker or podman)
+CONTAINER_ENGINE="docker"
 
 ########## Script
 
-PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+PATH=/home/cn/Documents/git/TeamsInDocker/bin:/usr/sbin:/usr/bin:/sbin:/bin
 TEAMS_DESKTOP_USER=${LOCAL_COMPUTER_USERNAME}
 
 # do we need to use sudo to start podman containers?
-(id -Gn | grep -q podman) || SUDO=sudo
+(id -Gn | grep -q $CONTAINER_ENGINE) || SUDO=sudo
 
 USER_UID=$(id -u)
 USER_GID=$(id -g)
 
 XSOCK=/tmp/.X11-unix-teamsOne
-XAUTH=/tmp/.podman.xauth-teamsOne
+XAUTH=/tmp/."${CONTAINER_ENGINE}".xauth-teamsOne
 
 DOWNLOAD_DIR=$(xdg-user-dir DOWNLOAD)
 if [ -z "${DOWNLOAD_DIR}" ]; then
@@ -43,18 +42,18 @@ list_commands() {
 
 cleanup_stopped_teams_desktop_instances() {
   echo "Cleaning up stopped teams-desktop instances..."
-  for c in $(${SUDO} podman ps -a -q); do
-    image="$(${SUDO} podman inspect -f {{.Config.Image}} ${c})"
+  for c in $(${SUDO} ${CONTAINER_ENGINE} ps -a -q); do
+    image="$(${SUDO} ${CONTAINER_ENGINE} inspect -f {{.Config.Image}} ${c})"
     if [ "${image}" == ${IMAGE_NAME} ]; then
-      running=$(${SUDO} podman inspect -f {{.State.Running}} ${c})
+      running=$(${SUDO} ${CONTAINER_ENGINE} inspect -f {{.State.Running}} ${c})
       if [ "${running}" != "true" ]; then
-        ${SUDO} podman rm "${c}" >/dev/null
+        ${SUDO} ${CONTAINER_ENGINE} rm "${c}" >/dev/null
       fi
     fi
   done
 }
 
-prepare_podman_env_parameters() {
+prepare_container_env_parameters() {
   ENV_VARS+=" --env=USER_UID=${USER_UID}"
   ENV_VARS+=" --env=USER_GID=${USER_GID}"
   ENV_VARS+=" --env=DISPLAY=unix$DISPLAY"
@@ -63,7 +62,7 @@ prepare_podman_env_parameters() {
   ENV_VARS+=" --env=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket"
 }
 
-prepare_podman_volume_parameters() {
+prepare_container_volume_parameters() {
   touch ${XAUTH}
   xauth nlist :0 | sed -e 's/^..../ffff/' | xauth -f ${XAUTH} nmerge -
 
@@ -79,7 +78,7 @@ prepare_podman_volume_parameters() {
 
 }
 
-prepare_podman_device_parameters() {
+prepare_container_device_parameters() {
   # enumerate video devices for webcam support
   VIDEO_DEVICES=
   for device in /dev/video*; do
@@ -109,12 +108,12 @@ elif [[ -n ${exec} ]]; then
 fi
 
 cleanup_stopped_teams_desktop_instances
-prepare_podman_env_parameters
-prepare_podman_volume_parameters
-prepare_podman_device_parameters
+prepare_container_env_parameters
+prepare_container_volume_parameters
+prepare_container_device_parameters
 
 echo "Starting ${prog}..."
-${SUDO} podman run -d \
+${SUDO} ${CONTAINER_ENGINE} run -d --rm \
   --name ${CONTAINER_NAME} \
   --network host \
   --privileged \
@@ -127,5 +126,5 @@ ${SUDO} podman run -d \
   ${ENV_VARS} \
   ${VIDEO_DEVICES} \
   ${VOLUMES} \
-  ${TEAMS_EXTRA_podman_ARGUMENTS} \
+  ${TEAMS_EXTRA_CONTAINER_ARGUMENTS} \
   ${IMAGE_NAME} ${prog} $@ >/dev/null

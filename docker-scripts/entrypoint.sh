@@ -11,16 +11,12 @@ install_teams_desktop() {
   echo "Installing teams-wrapper..."
   install -m 0755 /var/cache/teams/teams-wrapper /target/
   install -m 0755 /var/cache/teams/teams-wrapper-two /target/
-  echo "Installing teams..."
-  ln -sf teams-wrapper /target/teams
 }
 
 uninstall_teams_desktop() {
   echo "Uninstalling teams-wrapper..."
   rm -rf /target/teams-wrapper
   rm -rf /target/teams-wrapper-two
-  echo "Uninstalling teams..."
-  rm -rf /target/teams
 }
 
 create_user() {
@@ -54,8 +50,7 @@ grant_access_to_video_devices() {
 
 launch_teams_desktop() {
   cd /home/${TEAMS_DESKTOP_USER}
-  sudo -HEu ${TEAMS_DESKTOP_USER} PULSE_SERVER=/run/pulse/native $@
-  # exec sudo -HEu ${TEAMS_DESKTOP_USER} PULSE_SERVER=/run/pulse/native QT_GRAPHICSSYSTEM="native" $@
+  exec sudo -HEu ${TEAMS_DESKTOP_USER} PULSE_SERVER=/run/pulse/native QT_GRAPHICSSYSTEM="native" $@
   tail -f /home/${TEAMS_DESKTOP_USER}/.config/Microsoft/Microsoft\ Teams/logs/teams-startup.log
 }
 
