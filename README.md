@@ -1,8 +1,7 @@
-# Microsoft Teams in Docker
+# Microsoft Teams in Container
 ![](https://i.imgur.com/pVwxCtz.png)
 
-
-This projects objective is to provide Microsoft Teams as a docker image to enable multiple accounts to be used simultaniously.
+This projects objective is to provide Microsoft Teams as a container to enable multiple accounts to be used simultaniously.
 
 The Makefile contains the relevant commands to use the application. The project works with two accounts, but can be extended to any number of accounts (not tested).
 
@@ -45,6 +44,3 @@ Simply run
 make kill-containers
 make uninstall
 ```
-
-Remmember to kill the containers with 
-
