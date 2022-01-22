@@ -10,7 +10,7 @@ CONTAINER_NAME="teams-two"
 CONFIG_PATH="${HOME}/.config/MicrosoftTwo"
 
 # Container runtime (docker or podman)
-CONTAINER_ENGINE="docker"
+CONTAINER_ENGINE="podman"
 
 ########## Script
 
