@@ -19,7 +19,6 @@ TEAMS_DESKTOP_USER=${LOCAL_COMPUTER_USERNAME}
 XSOCK=/home/$TEAMS_DESKTOP_USER/X/teamsOne/.X11-unix
 XAUTH=/home/$TEAMS_DESKTOP_USER/X/teamsOne/."${CONTAINER_ENGINE}".xauth
 
-
 # do we need to use sudo to start containers?
 if [ "$CONTAINER_ENGINE" == "docker" ]; then
 (id -Gn | grep -q $CONTAINER_ENGINE) || SUDO=sudo
@@ -77,10 +76,8 @@ create_x_folder() {
 prepare_container_volume_parameters() {
   if [ -d "/home/$TEAMS_DESKTOP_USER/X/teamsOne/" ]; then
     rm -rf "/home/$TEAMS_DESKTOP_USER/X/teamsOne/"
-    create_x_folder
-  else
-    create_x_folder
   fi
+  create_x_folder
 
   xauth nlist :0 | sed -e 's/^..../ffff/' | xauth -f ${XAUTH} nmerge -
 
@@ -131,6 +128,7 @@ prepare_container_volume_parameters
 prepare_container_device_parameters
 
 echo "Starting ${prog}..."
+set -o xtrace
 ${SUDO} ${CONTAINER_ENGINE} run -d \
   --name ${CONTAINER_NAME} \
   --network host \

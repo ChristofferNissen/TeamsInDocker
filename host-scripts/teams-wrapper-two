@@ -75,13 +75,9 @@ create_x_folder() {
 
 prepare_container_volume_parameters() {
   if [ -d "/home/$TEAMS_DESKTOP_USER/X/teamsTwo/" ]; then
-    echo "$FILE exists."
     rm -rf "/home/$TEAMS_DESKTOP_USER/X/teamsTwo/"
-    create_x_folder
-  else
-    echo "$FILE does not exist."
-    create_x_folder
   fi
+  create_x_folder
 
   xauth nlist :0 | sed -e 's/^..../ffff/' | xauth -f ${XAUTH} nmerge -
 
@@ -132,6 +128,7 @@ prepare_container_volume_parameters
 prepare_container_device_parameters
 
 echo "Starting ${prog}..."
+set -o xtrace
 ${SUDO} ${CONTAINER_ENGINE} run -d \
   --name ${CONTAINER_NAME} \
   --network host \
