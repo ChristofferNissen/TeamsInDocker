@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMAGE_NAME: teams-desktop
-      REGISTRY: ghcr.io/major
+      REGISTRY: ghcr.io/christoffernissen
     steps:
 
       - name: Clone the repository
