@@ -9,6 +9,9 @@ kill-containers:
 build:
 	podman build -t docker.io/stifstof/teams-desktop:latest .
 
+build-no-cache:
+	podman build --no-cache -t docker.io/stifstof/teams-desktop:latest .
+
 install:
 	podman run -it --rm --privileged \
 	--volume ./bin:/target \
@@ -19,11 +22,11 @@ uninstall:
 	--volume ./bin:/target \
 	docker.io/stifstof/teams-desktop:latest uninstall
 
+# convenience jobs
+
 push:
 	echo ${DOCKERHUB_STIFSTOF_PW} | podman login docker.io -u stifstof --password-stdin
 	podman push docker.io/stifstof/teams-desktop:latest
-
-# convenience jobs
 
 reinstall:
 	make uninstall
