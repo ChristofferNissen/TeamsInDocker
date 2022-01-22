@@ -45,7 +45,7 @@ cleanup_stopped_teams_desktop_instances() {
   echo "Cleaning up stopped teams instances..."
   for c in $(${SUDO} ${CONTAINER_ENGINE} ps -a -q); do
     image="$(${SUDO} ${CONTAINER_ENGINE} inspect -f {{.Name}} ${c})"
-    if [ "${image}" == "/${CONTAINER_NAME}" ]; then
+    if [ "${image}" == "${CONTAINER_NAME}" ]; then
       running=$(${SUDO} ${CONTAINER_ENGINE} inspect -f {{.State.Running}} ${c})
       if [ "${running}" != "true" ]; then
         ${SUDO} ${CONTAINER_ENGINE} rm "${c}" >/dev/null
