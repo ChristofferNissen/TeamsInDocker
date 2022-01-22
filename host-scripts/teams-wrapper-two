@@ -10,21 +10,23 @@ CONTAINER_NAME="teams-two"
 CONFIG_PATH="${HOME}/.config/MicrosoftTwo"
 
 # Container runtime (docker or podman)
-CONTAINER_ENGINE="docker"
+CONTAINER_ENGINE="podman"
 
 ########## Script
 
 PATH=/home/cn/Documents/git/TeamsInDocker/bin:/usr/sbin:/usr/bin:/sbin:/bin
 TEAMS_DESKTOP_USER=${LOCAL_COMPUTER_USERNAME}
+XSOCK=/home/$TEAMS_DESKTOP_USER/X/teamsTwo/.X11-unix
+XAUTH=/home/$TEAMS_DESKTOP_USER/X/teamsTwo/."${CONTAINER_ENGINE}".xauth
 
-# do we need to use sudo to start podman containers?
+# do we need to use sudo to start docker containers?
+if [ "$CONTAINER_ENGINE" == "docker" ]; then
 (id -Gn | grep -q $CONTAINER_ENGINE) || SUDO=sudo
+fi
 
 USER_UID=$(id -u)
 USER_GID=$(id -g)
 
-XSOCK=/tmp/.X11-unix-teamsTwo
-XAUTH=/tmp/."$CONTAINER_ENGINE".xauth-teamsTwo
 
 DOWNLOAD_DIR=$(xdg-user-dir DOWNLOAD)
 if [ -z "${DOWNLOAD_DIR}" ]; then
@@ -34,20 +36,23 @@ fi
 list_commands() {
   echo ""
   echo "Launch teams using:"
-  echo "  teams                     OR "
   echo "  teams-wrapper teams"
   echo ""
   exit 1
 }
 
 cleanup_stopped_teams_desktop_instances() {
-  echo "Cleaning up stopped teams-desktop instances..."
-  for c in $(${SUDO} $CONTAINER_ENGINE ps -a -q); do
-    image="$(${SUDO} $CONTAINER_ENGINE inspect -f {{.Config.Image}} ${c})"
-    if [ "${image}" == ${IMAGE_NAME} ]; then
-      running=$(${SUDO} $CONTAINER_ENGINE inspect -f {{.State.Running}} ${c})
+  echo "Cleaning up stopped teams instances..."
+  for c in $(${SUDO} ${CONTAINER_ENGINE} ps -a -q); do
+    image="$(${SUDO} ${CONTAINER_ENGINE} inspect -f {{.Name}} ${c})"
+    if [ "${image}" == "${CONTAINER_NAME}" ]; then
+      running=$(${SUDO} ${CONTAINER_ENGINE} inspect -f {{.State.Running}} ${c})
       if [ "${running}" != "true" ]; then
-        ${SUDO} $CONTAINER_ENGINE rm "${c}" >/dev/null
+        ${SUDO} ${CONTAINER_ENGINE} rm "${c}" >/dev/null
+      fi
+      if [ "${running}" == "true" ]; then
+        ${SUDO} ${CONTAINER_ENGINE} kill "${c}" >/dev/null
+        ${SUDO} ${CONTAINER_ENGINE} rm "${c}" >/dev/null
       fi
     fi
   done
@@ -62,8 +67,22 @@ prepare_container_env_parameters() {
   ENV_VARS+=" --env=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket"
 }
 
-prepare_container_volume_parameters() {
+create_x_folder() {
+  mkdir "/home/$TEAMS_DESKTOP_USER/X/teamsTwo/"
   touch ${XAUTH}
+  touch ${XSOCK}
+}
+
+prepare_container_volume_parameters() {
+  if [ -d "/home/$TEAMS_DESKTOP_USER/X/teamsTwo/" ]; then
+    echo "$FILE exists."
+    rm -rf "/home/$TEAMS_DESKTOP_USER/X/teamsTwo/"
+    create_x_folder
+  else
+    echo "$FILE does not exist."
+    create_x_folder
+  fi
+
   xauth nlist :0 | sed -e 's/^..../ffff/' | xauth -f ${XAUTH} nmerge -
 
   VOLUMES+=" --volume=${CONFIG_PATH}:/home/${TEAMS_DESKTOP_USER}/.config/Microsoft/"
@@ -113,16 +132,13 @@ prepare_container_volume_parameters
 prepare_container_device_parameters
 
 echo "Starting ${prog}..."
-${SUDO} $CONTAINER_ENGINE run -d --rm \
+${SUDO} ${CONTAINER_ENGINE} run -d \
   --name ${CONTAINER_NAME} \
   --network host \
-  --privileged \
   --memory=4g \
   --shm-size=4g \
   --device /dev/dri \
   --device /dev/snd \
-  -v /tmp/.X11-unix:/tmp/.X11-unix \
-  -e DISPLAY=unix$DISPLAY \
   ${ENV_VARS} \
   ${VIDEO_DEVICES} \
   ${VOLUMES} \

@@ -7,7 +7,7 @@ kill-containers:
 	podman kill teams-two
 
 build:
-	podman build . -t docker.io/stifstof/teams-desktop:latest
+	podman build -t docker.io/stifstof/teams-desktop:latest .
 
 install:
 	podman run -it --rm --privileged \
@@ -20,6 +20,7 @@ uninstall:
 	docker.io/stifstof/teams-desktop:latest uninstall
 
 push:
+	echo ${DOCKERHUB_STIFSTOF_PW} | podman login docker.io -u stifstof --password-stdin
 	podman push docker.io/stifstof/teams-desktop:latest
 
 # convenience jobs
@@ -34,4 +35,4 @@ create-empty-config-folders:
 	mkdir ~/.config/MicrosoftTwo
 
 add-to-path:
-	export PATH=$PATH:~/Documents/git/TeamsInDocker/bin
+	export PATH=$PATH:/home/cn/Documents/git/TeamsInDocker/bin

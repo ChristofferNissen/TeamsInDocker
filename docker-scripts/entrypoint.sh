@@ -50,8 +50,10 @@ grant_access_to_video_devices() {
 
 launch_teams_desktop() {
   cd /home/${TEAMS_DESKTOP_USER}
-  exec sudo -HEu ${TEAMS_DESKTOP_USER} PULSE_SERVER=/run/pulse/native QT_GRAPHICSSYSTEM="native" $@
+  sudo -u ${TEAMS_DESKTOP_USER} teams
+  # exec sudo -HEu ${TEAMS_DESKTOP_USER} PULSE_SERVER=/run/pulse/native QT_GRAPHICSSYSTEM="native" $@
   tail -f /home/${TEAMS_DESKTOP_USER}/.config/Microsoft/Microsoft\ Teams/logs/teams-startup.log
+  stat /home/${TEAMS_DESKTOP_USER}/.config/Microsoft/Microsoft\ Teams/logs/teams-startup.log
 }
 
 case "$1" in
