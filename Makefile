@@ -7,7 +7,7 @@ kill-containers:
 	podman kill teams-two
 
 build:
-	podman build . -t docker.io/stifstof/teams-desktop:latest
+	podman build -t docker.io/stifstof/teams-desktop:latest .
 
 install:
 	podman run -it --rm --privileged \
@@ -20,6 +20,7 @@ uninstall:
 	docker.io/stifstof/teams-desktop:latest uninstall
 
 push:
+	echo ${DOCKERHUB_STIFSTOF_PW} | podman login docker.io -u stifstof --password-stdin
 	podman push docker.io/stifstof/teams-desktop:latest
 
 # convenience jobs
