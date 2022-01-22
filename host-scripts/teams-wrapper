@@ -10,7 +10,7 @@ CONTAINER_NAME="teams"
 CONFIG_PATH="${HOME}/.config/Microsoft"
 
 # Container runtime (docker or podman)
-CONTAINER_ENGINE="docker"
+CONTAINER_ENGINE="podman"
 
 ########## Script
 
@@ -76,11 +76,9 @@ create_x_folder() {
 
 prepare_container_volume_parameters() {
   if [ -d "/home/$TEAMS_DESKTOP_USER/X/teamsOne/" ]; then
-    echo "$FILE exists."
     rm -rf "/home/$TEAMS_DESKTOP_USER/X/teamsOne/"
     create_x_folder
   else
-    echo "$FILE does not exist."
     create_x_folder
   fi
 
@@ -133,11 +131,9 @@ prepare_container_volume_parameters
 prepare_container_device_parameters
 
 echo "Starting ${prog}..."
-
 ${SUDO} ${CONTAINER_ENGINE} run -d \
   --name ${CONTAINER_NAME} \
   --network host \
-  --privileged \
   --memory=4g \
   --shm-size=4g \
   --device /dev/dri \
