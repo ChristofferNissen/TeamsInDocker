@@ -1,4 +1,4 @@
-name: Build ubi-flask container
+name: Build teams container
 on:
   - push
 
