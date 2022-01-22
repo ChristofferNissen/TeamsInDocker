@@ -36,9 +36,8 @@ RUN apt-get install -qy \
   pulseaudio \
   gnupg2 \
   && curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add - \
-  && sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/ms-teams stable main" > /etc/apt/sources.list.d/teams.list'
-
-RUN apt-get -y update \
+  && sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/ms-teams stable main" > /etc/apt/sources.list.d/teams.list' \
+  && apt-get -y update \
   && apt-get -y install teams
 
 # Copy scripts to correct location (/var/cache is host machine)
