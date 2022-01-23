@@ -10,7 +10,12 @@ CONTAINER_NAME="teams-two"
 CONFIG_PATH="${HOME}/.config/MicrosoftTwo"
 
 # Container runtime (docker or podman)
-CONTAINER_ENGINE="podman"
+CONTAINER_ENGINE="${CONTAINER_ENGINE}"
+if [ -z "$CONTAINER_ENGINE" ]
+then
+  echo "\$CONTAINER_ENGINE is empty. Defaulting to podman"
+  CONTAINER_ENGINE="podman"
+fi
 
 ########## Script
 

@@ -3,6 +3,15 @@
 
 This projects objective is to provide Microsoft Teams as a container to enable multiple accounts to be used simultaniously.
 
+Currently the project supports Docker and Podman. Select which runtime you want with the convenient make targets:
+
+Makefile (System setup)
+- docker
+- podman
+- current_runtime
+
+The default runtime is Docker. Select podman with "make podman" and confirm with "make current_runtime".
+
 The Makefile contains the relevant commands to use the application. The project works with two accounts, but can be extended to any number of accounts (not tested).
 
 Teams is not the most stable application, so you can expect to get familiar with the two first commands in the Maefile:
