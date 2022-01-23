@@ -9,15 +9,22 @@ IMAGE_NAME="docker.io/stifstof/teams-desktop:latest"
 CONTAINER_NAME="teams"
 CONFIG_PATH="${HOME}/.config/Microsoft"
 
+########## Script
+
 # Container runtime (docker or podman)
 CONTAINER_ENGINE="${CONTAINER_ENGINE}"
+# Local .env
+if [ -f "/home/${LOCAL_COMPUTER_USERNAME}/Documents/git/TeamsInDocker/.env" ]; then
+    # Load Environment Variables
+    export $(cat .env | grep -v '#' | awk '/=/ {print $1}')
+    # For instance, will be example_kaggle_key
+    echo $CONTAINER_ENGINE
+fi
 if [ -z "$CONTAINER_ENGINE" ]
 then
-  echo "\$CONTAINER_ENGINE is empty. Defaulting to podman"
-  CONTAINER_ENGINE="podman"
+  echo "\$CONTAINER_ENGINE is empty. Defaulting to docker"
+  CONTAINER_ENGINE="docker"
 fi
-
-########## Script
 
 PATH=/home/cn/Documents/git/TeamsInDocker/bin:/usr/sbin:/usr/bin:/sbin:/bin
 TEAMS_DESKTOP_USER=${LOCAL_COMPUTER_USERNAME}
@@ -62,6 +69,13 @@ cleanup_stopped_teams_desktop_instances() {
     fi
   done
 }
+
+prepare_extra_arguments() {
+  if [ "$CONTAINER_ENGINE" == "docker" ]; then
+    TEAMS_EXTRA_CONTAINER_ARGUMENTS+="--privileged"
+  fi
+}
+
 
 prepare_container_env_parameters() {
   ENV_VARS+=" --env=USER_UID=${USER_UID}"
@@ -131,6 +145,7 @@ cleanup_stopped_teams_desktop_instances
 prepare_container_env_parameters
 prepare_container_volume_parameters
 prepare_container_device_parameters
+prepare_extra_arguments
 
 echo "Starting ${prog}..."
 set -o xtrace
@@ -141,8 +156,8 @@ ${SUDO} ${CONTAINER_ENGINE} run -d \
   --shm-size=4g \
   --device /dev/dri \
   --device /dev/snd \
+  ${TEAMS_EXTRA_CONTAINER_ARGUMENTS} \
   ${ENV_VARS} \
   ${VIDEO_DEVICES} \
   ${VOLUMES} \
-  ${TEAMS_EXTRA_CONTAINER_ARGUMENTS} \
   ${IMAGE_NAME} ${prog} $@ >/dev/null

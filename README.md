@@ -6,8 +6,8 @@ This projects objective is to provide Microsoft Teams as a container to enable m
 Currently the project supports Docker and Podman. Select which runtime you want with the convenient make targets:
 
 Makefile (System setup)
-- docker
-- podman
+- docker_runtime
+- podman_runtime
 - current_runtime
 
 The default runtime is Docker. Select podman with "make podman" and confirm with "make current_runtime".
