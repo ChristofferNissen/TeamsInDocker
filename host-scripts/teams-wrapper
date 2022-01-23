@@ -76,7 +76,6 @@ prepare_extra_arguments() {
   fi
 }
 
-
 prepare_container_env_parameters() {
   ENV_VARS+=" --env=USER_UID=${USER_UID}"
   ENV_VARS+=" --env=USER_GID=${USER_GID}"
