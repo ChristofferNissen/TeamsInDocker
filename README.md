@@ -23,6 +23,10 @@ Makefile
 - uninstall
 - build
 
+# Supported Container Runtimes
+
+Podman has been added as an alternative to Docker, to enable use on systems without root access. When using Podman, the container user's root will only have the permission of the user executing podman, and the container user will have UID > 10000 as per best practice recommendations.
+
 # Old Readme
 
 This project is inspired from te works of gfa01/slack-desktop, but instead for Microsoft Teams. The old README explains the use of PulseAudio and XServer well
