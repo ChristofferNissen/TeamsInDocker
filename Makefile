@@ -16,12 +16,12 @@ build-no-cache:
 
 install:
 	${CONTAINER_ENGINE} run -it --rm --privileged \
-	--volume ./bin:/target \
+	--volume ${PWD}/bin:/target \
 	docker.io/stifstof/teams-desktop:latest install
 
 uninstall:
 	${CONTAINER_ENGINE} run -it --rm --privileged \
-	--volume ./bin:/target \
+	--volume ${PWD}/bin:/target \
 	docker.io/stifstof/teams-desktop:latest uninstall
 
 # convenience jobs
@@ -44,11 +44,11 @@ create-empty-config-folders:
 add-to-path:
 	export PATH=$PATH:/home/cn/Documents/git/TeamsInDocker/bin
 
-podman:
+podman_runtime:
 	rm -f .env
 	echo "CONTAINER_ENGINE=podman" >> .env
 
-docker:
+docker_runtime:
 	rm -f .env
 	echo "CONTAINER_ENGINE=docker" >> .env
 
