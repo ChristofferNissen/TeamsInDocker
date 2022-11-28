@@ -5,7 +5,7 @@ launch:
 	teams-wrapper-two teams
 
 kill-containers:
-	${CONTAINER_ENGINE} kill teams || podman kill teams-two  # if error try kill other instance before exit
+	${CONTAINER_ENGINE} kill teams || ${CONTAINER_ENGINE} kill teams-two  # if error try kill other instance before exit
 	${CONTAINER_ENGINE} kill teams-two
 
 build:
@@ -27,7 +27,7 @@ uninstall:
 # convenience jobs
 
 push:
-	echo ${DOCKERHUB_STIFSTOF_PW} | podman login docker.io -u stifstof --password-stdin
+	echo ${DOCKERHUB_STIFSTOF_PW} | ${CONTAINER_ENGINE} login docker.io -u stifstof --password-stdin
 	${CONTAINER_ENGINE} push docker.io/stifstof/teams-desktop:latest
 
 reinstall:
